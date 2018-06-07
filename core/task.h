@@ -13,6 +13,7 @@ typedef intptr_t tid_t;
 typedef struct tcb_t
 {
 	xlen_t *sp;
+	tid_t  mgr;
 	int    status;
 	uint64_t finish_time;
 	char *task_name;
@@ -23,9 +24,21 @@ typedef struct tcb_t
 typedef struct task_attr_t
 {
 	xlen_t *sp;
-	void *exit_handler;
 	char *task_name;
+	void *exit_handler;
+	tid_t mgr;
 	
 }task_attr_t;
+
+
+
+tid_t task_creat(void (*task)(),task_attr_t attr);
+void task_next_task(tid_t id);
+void task_sche(void);
+void task_sleep(uint64_t t);
+
+tid_t get_mgr(tid_t id);
+tid_t get_tid();
+
 
 #endif

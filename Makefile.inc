@@ -22,5 +22,6 @@ UCOS_SOURCE_DIR	= ./source
 
 #-----------------------------------------------------------
 WARNINGS= -Wall -Wextra -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-align -Wsign-compare \
-		-Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wunused
+		-Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wunused \
+		-Wno-missing-declarations -Wno-missing-prototypes
 

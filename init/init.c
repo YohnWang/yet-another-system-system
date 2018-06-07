@@ -1,5 +1,6 @@
 #include<stdint.h>
 #include<cpu.h>
+#include<host.h>
 
 static void init_bss(void)
 {
@@ -36,7 +37,9 @@ void __attribute__((weak)) exit(int rvalue)
 {
 	extern int printf(const char*,...);
 	disable_global_int();
-	printf("exit!!!code: %d\n",rvalue);
+	//printf("this exit function is default\n");
+	//printf("exit!!!code: %d\n",rvalue);
+	tohost=1|(rvalue<<1);
 	for(;;){}
 }
 
@@ -45,6 +48,8 @@ void init(void)
 	extern int main(int,char*[]);
 	init_sbss();
 	init_bss();
+	extern void init_heap(void);
+	init_heap();
 	char *argv[]={"yyos",NULL};
 	exit(main(1,argv));
 }

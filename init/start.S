@@ -11,7 +11,6 @@ _mstart:
 	//set trap-vector base-address register
     la t0, trap_vector
     csrw mtvec, t0
-	
 
     //initialize all general register
     li	x1, 0
@@ -60,8 +59,7 @@ _mstart:
 trap_vector:
 	
     STORE_CTX_REG
-    //-mv a0,ra
-    //-jal printx
+
     //call xlen_t trap_handler(mcause,mepc,sp);
     csrr a0,mcause
     csrr a1,mepc
@@ -79,11 +77,6 @@ task_switch:
 	//restore sp when trap occur ,it's important
 	mv sp,a0
 	
-	//next pc ,and restore it
-	csrr t0,mepc
-	addi t0,t0,4
-	STORE t0,31*REGBYTES(sp)
-	
 	//then store sp
 	//first get the task id,and get this task's tcb:sp
 	//get_tcb_sp(get_tid())
@@ -91,7 +84,7 @@ task_switch:
 	jal get_tcb_sp
 	//store sp
 	STORE sp,0(a0)
-	//-jal printx
+
 	//switch to new task's tcb
 	//first get the new task id,and get its sp
 	jal get_next_tid
@@ -99,7 +92,7 @@ task_switch:
 	jal get_tcb_sp
 	//get new sp
 	LOAD sp,0(a0)
-	//-jal printx
+
 	//set task id as new task id
 	mv a0,t0
 	jal set_tid
@@ -126,5 +119,10 @@ cpu_sr_reset:
 	csrw mstatus,a0
 	ret 
 	
+	.global system_call
+	//void system_call(long sysnum,long arg1,long arg2,long arg3)
+system_call:
+	scall
+	ret 
     .end
     

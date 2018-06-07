@@ -9,7 +9,7 @@
 #define time (*(volatile uint64_t*)time_addr)
 #define timecmp (*(volatile uint64_t*)timecmp_addr)
 
-#define Time_Tick_Clk (100)
+#define Time_Tick_Clk (1000)
 
 typedef uint64_t time_t;
 

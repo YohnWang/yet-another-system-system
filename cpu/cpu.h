@@ -1,7 +1,19 @@
 #ifndef _CPU_H
 #define _CPU_H
 
-#include<trap.h>
+#include<stdint.h>
+
+#if __riscv_xlen == 64
+typedef int64_t xlen_t;
+
+
+#else 
+typedef int32_t xlen_t;
+
+
+#endif
+ 
+typedef uint32_t ilen_t;
 
 #define enable_global_int() asm("csrsi mstatus,0x8")
 #define disable_global_int() asm("csrci mstatus,0x8")
@@ -12,8 +24,8 @@
 extern void cpu_sr_reset(xlen_t);
 extern xlen_t   cpu_sr_set(void);
 
-#define atomic_begin() xlen_t _sr=cpu_sr_set()
-#define atomic_end()   cpu_sr_reset(_sr)
+#define atomic_begin(_sr)  ({_sr=cpu_sr_set();})
+#define atomic_end(_sr)   cpu_sr_reset(_sr)
 
 #endif
 
