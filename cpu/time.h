@@ -3,11 +3,6 @@
 
 #include<stdint.h>
 
-#define time_addr     (0x2000000+0xbff8)
-#define timecmp_addr  (0x2000000+0x4000)
-
-#define time (*(volatile uint64_t*)time_addr)
-#define timecmp (*(volatile uint64_t*)timecmp_addr)
 
 #define Time_Tick_Clk (1000)
 

@@ -74,6 +74,10 @@ int main(int argc,char *argv[])
 {
 	(void)argc,(void)argv;
 	printf("start...\n");
+	
+	__int128 xxx=1234567895;
+	xxx>>2;
+	
 	/*
 	int fcnt=0,gcnt=0;
 	for(;;)

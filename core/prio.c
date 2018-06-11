@@ -52,14 +52,18 @@ int prio_get(prio *sche)
 {
 	uint64_t pt=sche->prio_tab;
 	int pr=ntz(pt);
-	if(pr<sizeof(sche->prio_tab))
+	if(pr<sizeof(sche->prio_tab)*8)
 		return pr;
 	return -1;
 }
 
 tid_t prio_tid(prio *sche)
 {
-	return sche->tid_map[prio_get(sche)];
+	int pr=prio_get(sche);
+	if(pr<0)
+		return -1;
+	else 
+		return sche->tid_map[pr];
 }
 
 

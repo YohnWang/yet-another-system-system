@@ -14,6 +14,7 @@ typedef struct tcb_t
 {
 	xlen_t *sp;
 	tid_t  mgr;
+	int   prio;
 	int    status;
 	uint64_t finish_time;
 	char *task_name;
@@ -24,6 +25,7 @@ typedef struct tcb_t
 typedef struct task_attr_t
 {
 	xlen_t *sp;
+	int   prio;
 	char *task_name;
 	void *exit_handler;
 	tid_t mgr;
@@ -39,6 +41,12 @@ void task_sleep(uint64_t t);
 
 tid_t get_mgr(tid_t id);
 tid_t get_tid();
+uint64_t get_finish_time(tid_t id);
+
+void task_block();
+void task_awake(tid_t id);
+void task_set_status(tid_t id,int status);
+int task_get_status(tid_t id);
 
 
 #endif

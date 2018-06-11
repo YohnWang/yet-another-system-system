@@ -4,6 +4,7 @@
 #include<host.h>
 #include<rrsched.h>
 #include<task.h>
+#include<ds.h>
 
 extern void task_switch(xlen_t sp[]);
 
@@ -30,24 +31,29 @@ void syscall_handler(xlen_t sp[])
 }
 
 void time_handler(xlen_t sp[])
-{/*
-	static int run=0;
-	extern tid_t t1,t2;
-	if(run<10)
+{
+	//
+	extern struct prio sched;
+	extern struct heap slp_q;
+	//printf("time int\n");
+	if(!heap_empty(&slp_q))
 	{
-		task_next_task(t1);
+		tid_t id=slp_q.a[0];
+		if(get_finish_time(id)<get_time())
+		{
+			int pr=get_tprio(id);
+			prio_add(&sched,id,pr);
+			heap_pop(&slp_q);
+			//task_awake(id);
+			//printf("pr=%d resume\n",pr);
+		}
 	}
-	else if(run<12)
+	int pr=prio_get(&sched);
+	if(pr>=0)
 	{
-		task_next_task(t2);
+		task_next_task(prio_tid(&sched));
+		task_switch(sp);
 	}
-	else 
-	{
-		task_next_task(0);
-		run=0;
-	}
-	run++;
-	task_switch(sp);*/
 }
 
 
@@ -94,7 +100,7 @@ void halt(xlen_t mcause,xlen_t mepc)
 {
 	extern void exit(int);
 	disable_global_int();
-	printf("halt ,mcause=%llx ,mepc=%llx\n",mcause,mepc);
+	printf("halt ,mcause=%lx ,mepc=%lx\n",mcause,mepc);
 	exit(0);
 }
 

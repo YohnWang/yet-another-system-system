@@ -1,8 +1,19 @@
 #include<task.h>
 #include<trap.h>
+#include<ds.h>
+#include<prio.h>
+
+
+//scheduler 
+struct prio sched={0,{0}};
+
+
+//time blocker
+struct heap slp_q={{0},0};
+
 
 //task control block
-static tcb_t Task_Tcb[TASK_NUM]; 
+static tcb_t Task_Tcb[TASK_NUM]={[0]={.prio=63,.status=1,.task_name="main"}}; 
 static char  Task_Tcb_Used[TASK_NUM]={1};
 static tid_t Task_Tcb_Index=1;
 static tid_t Task_Counter=1;
@@ -13,12 +24,18 @@ static tid_t Task_Next_Id=0;
 
 //initialize context of task
 
-static void task_exit_handler()
+void task_exit()
 {
+	xlen_t sr;
+	atomic_begin(sr);
 	printf("task return \n");
-	tid_t id=get_mgr(get_tid());
 	Task_Tcb_Used[get_tid()]=0;
+	prio_del(&sched,get_tprio(get_tid()));
+	tid_t id=prio_tid(&sched);
+	if(id<0)
+		id=0;
 	task_next_task(id);
+	atomic_end(sr);
 	task_sche();
 }
 
@@ -26,7 +43,8 @@ static void task_exit_handler()
 static xlen_t* task_stk_init(void *task,xlen_t *sp,void *exit_handler)
 {
 	xlen_t *stk=sp-32; //alloc 32*xlen size of spaces
-	stk[0]=(xlen_t)(exit_handler?exit_handler:task_exit_handler); //ra
+	stk[0]=(xlen_t)(exit_handler?exit_handler:task_exit); //ra
+#ifdef INIT_CTX_ALL
 	stk[1]=0;//unused
 	stk[2]=0;//unused
 	stk[3]=0;//unused
@@ -57,6 +75,7 @@ static xlen_t* task_stk_init(void *task,xlen_t *sp,void *exit_handler)
 	stk[28]=0;
 	stk[29]=0;
 	stk[30]=0;
+#endif
 	stk[31]=(xlen_t)task;//mepc                      
     return stk;
 }
@@ -88,9 +107,14 @@ tid_t task_creat(void (*task)(),task_attr_t attr)
 	Task_Tcb[Task_Tcb_Index].task_name=attr.task_name;
 	Task_Tcb[Task_Tcb_Index].status=NEW;
 	Task_Tcb[Task_Tcb_Index].mgr=attr.mgr?attr.mgr:Task_Id;
+	Task_Tcb[Task_Tcb_Index].prio=attr.prio;
 
+	prio_add(&sched,Task_Tcb_Index,attr.prio);
 	
-	volatile tid_t index=Task_Tcb_Index;
+	task_awake(Task_Tcb_Index);
+	
+	
+	tid_t index=Task_Tcb_Index;
 	printf("task id =%lld \n",index);
 	atomic_end(sr);
 	return index;
@@ -98,17 +122,51 @@ tid_t task_creat(void (*task)(),task_attr_t attr)
 
 
 
-void task_block(tid_t id)
+void task_block()
 {
-
+	xlen_t sr;
+	atomic_begin(sr);
+	Task_Tcb[get_tid()].status&=~1;
+	prio_del(&sched,Task_Tcb[get_tid()].prio);
+	int id=prio_tid(&sched);
+	task_next_task(id);
+	atomic_end(sr);
+	task_sche();
 }
 
 void task_awake(tid_t id)
 {
-
+	xlen_t sr;
+	atomic_begin(sr);
+	Task_Tcb[id].status|=1;
+	prio_add(&sched,id,Task_Tcb[id].prio);
+	id=prio_tid(&sched);
+	atomic_end(sr);
+	if(id>=0)
+	{
+		task_next_task(id);
+		task_sche();
+	}
+	
 }
 
+void task_set_status(tid_t id,int status)
+{
+	xlen_t sr;
+	atomic_begin(sr);
+	Task_Tcb[id].status &=1;
+	Task_Tcb[id].status |=status<<1;
+	atomic_end(sr);
+}
 
+int task_get_status(tid_t id)
+{
+	xlen_t sr;
+	atomic_begin(sr);
+	int r=Task_Tcb[id].status;
+	atomic_end(sr);
+	return r;
+}
 
 //get tcb information
 //these function are used by .s file
@@ -142,6 +200,15 @@ char* get_task_name(tid_t id)
 	return Task_Tcb[id].task_name;
 }
 
+uint64_t get_finish_time(tid_t id)
+{
+	return Task_Tcb[id].finish_time;
+}
+
+int get_tprio(tid_t id)
+{
+	return Task_Tcb[id].prio;
+}
 
 //switch context of task
 void task_next_task(tid_t id)
@@ -156,36 +223,33 @@ void task_sche(void)
 {
 	if(Task_Next_Id == Task_Id)
 		return ;
-	//if(get_time()<Task_Tcb[Task_Next_Id].finish_time)
-	//	return ;
+
 	system_call(SYS_TASKSW);
 }
 
-static tid_t find_first_task(tid_t now)
-{
-	now++;
-	if(now>=TASK_NUM)
-		now=0;
-	while(Task_Tcb_Used[now]==0)
-	{
-		now++;
-		if(now>=TASK_NUM)
-			now=0;
-	}
-}
+
 
 void task_sleep(uint64_t t)
 {
 	xlen_t sr;
 	atomic_begin(sr);
+	
 	Task_Tcb[Task_Id].finish_time=get_time()+t;
-	atomic_end(sr);
-	if(Task_Next_Id!=Task_Id)
-		task_sche();
+	heap_push(&slp_q,Task_Id);
+	prio_del(&sched,Task_Tcb[Task_Id].prio);
+	
+		
 	while(get_time()<Task_Tcb[Task_Id].finish_time)
 	{
-		task_next_task(find_first_task(Task_Id));
-		task_sche();
+		int pr=prio_get(&sched);
+		if(pr>=0)
+		{
+			task_next_task(prio_tid(&sched));
+			atomic_end(sr);
+			task_sche();
+			return ;
+		}
 	}
+	atomic_end(sr);
 }
 

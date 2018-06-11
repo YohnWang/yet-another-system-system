@@ -46,10 +46,12 @@ void __attribute__((weak)) exit(int rvalue)
 void init(void)
 {
 	extern int main(int,char*[]);
+	extern struct prio sched;
 	init_sbss();
 	init_bss();
 	extern void init_heap(void);
 	init_heap();
 	char *argv[]={"yyos",NULL};
+	prio_add(&sched,0,63);
 	exit(main(1,argv));
 }
