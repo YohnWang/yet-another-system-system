@@ -1,6 +1,52 @@
 #include"utils.h"
 
-#define STK_LEN 4096
+#define QSIZE (20)
+struct queue
+{
+	int a[QSIZE];
+	int size;
+	int front;
+	int rear;
+} que={0};
+
+void queue_push(int x)
+{
+	if(que.size<QSIZE)
+	{
+		int rear=(que.rear+1)%QSIZE;
+		que.a[que.rear]=x;
+		que.size++;
+		que.rear=rear;
+	}
+}
+
+int queue_pop()
+{
+	int r=-1;
+	if(que.size>=0)
+	{
+		r=que.a[que.front];
+		int front=(que.front+1)%QSIZE;
+		que.front=front;
+		que.size--;
+	}
+	return r;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#define STK_LEN 2048*4
 
 xlen_t Task1_STK[STK_LEN];
 xlen_t Task2_STK[STK_LEN];
@@ -9,86 +55,57 @@ xlen_t Task4_STK[STK_LEN];
 xlen_t Task5_STK[STK_LEN];
 
 tid_t t1,t2,t3,t4,t5;
-sem s={0};
-void task()
+
+sem full={0};
+sem empty={10};
+sem mutex={1};
+
+int index=0;
+
+void producer()
 {
 	int cnt=0;
 	for(;;)
 	{
-		xlen_t sr;
-		//atomic_begin(sr);
-		//printf("%s is runing %d\n",get_task_name(get_tid()),cnt++);
-		//atomic_end(sr);
-		//task_sleep(1000000);
-		sem_wait(&s);
-		atomic_begin(sr);
-		printf("fuck yourself\n");
-		atomic_end(sr);
+		sem_wait(&empty);
+		sem_wait(&mutex);
+		
+		queue_push(cnt);
+		printf("produce %d...\n",cnt);
+		cnt++;
+		
+		sem_signal(&mutex);
+		sem_signal(&full);
+		task_sleep(100000);
 	}
 }
 
-void exec()
+void customer()
 {
 	for(;;)
 	{
-		xlen_t sr;
-		atomic_begin(sr);
-		printf("signal \n");
-		atomic_end(sr);
+		sem_wait(&full);
+		sem_wait(&mutex);
 		
-		sem_signal(&s);
+		printf("custom %d...\n",queue_pop());
+		
+		sem_signal(&mutex);
+		sem_signal(&empty);
 		task_sleep(1000000);
 	}
 }
 
-void timer()
-{
-	//uint64_t next_time=get_time()+1000000;
-	for(;;)
-	{
-		task_sleep(12345000);
-		xlen_t sr;
-		atomic_begin(sr);
-		printf("timer occur\n");
-		
-		atomic_end(sr);task_awake(t1);
-		
-	}
-}
 
-
-void thread()
-{
-	
-}
 
 int main()
 {
 	
-	t1=task_creat(task,(task_attr_t){&Task1_STK[STK_LEN-1],1, .task_name="task1"});
-	t2=task_creat(exec,(task_attr_t){&Task2_STK[STK_LEN-1],2, .task_name="task2"});
+	t1=task_creat(producer,(task_attr_t){&Task1_STK[STK_LEN-1],1, .task_name="task1"});
+	t2=task_creat(customer,(task_attr_t){&Task2_STK[STK_LEN-1],2, .task_name="task2"});
 	//t3=task_creat(task,(task_attr_t){&Task3_STK[STK_LEN-1],3, .task_name="task3"});
 	//t4=task_creat(task,(task_attr_t){&Task4_STK[STK_LEN-1],4, .task_name="task4"});
 	//t5=task_creat(timer,(task_attr_t){&Task5_STK[STK_LEN-1],5,.task_name="timer"});
-	prio cap={0,{0}};
-	//prio_add(&cap,t1,1);
-	//prio_add(&cap,t2,3);
-	//prio_add(&cap,t3,4);
-	//prio_add(&cap,t4,6);
 	enable_global_int();
 	enable_time_int();
-	extern struct prio sched;
-	for(;;){/*if(sched.prio_tab)printf("%lld\n",sched.prio_tab);*/}
-	for(;;)
-	{
-		int   pr=prio_get(&cap);
-		//if(pr<0)
-		//	return 2;
-		tid_t id=prio_tid(&cap);
-		task_next_task(id);
-		task_sche();
-		prio_del(&cap,pr);
-		
-		
-	}
+	for(;;){}
 }

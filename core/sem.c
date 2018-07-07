@@ -43,15 +43,17 @@ static void arr_del(tid_t a[],int n,int i)
 
 void sem_signal(sem *s)
 {
-	xlen_t sr=cpu_sr_set();
+	xlen_t sr;
+	atomic_begin(sr);
 	s->counter++;
 	int dx=find_high_task(s);
-	tid_t id;
-	if(dx!=-1)
+	tid_t id=-1;
+	if(dx>=0)
 	{
 		id=s->wait_arr[dx];
 		arr_del(s->wait_arr,s->wait_num--,dx);
 	}
-	cpu_sr_reset(sr);
-	task_awake(id);
+	atomic_end(sr);
+	if(id>=0)
+		task_awake(id);
 }

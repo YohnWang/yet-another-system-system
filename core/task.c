@@ -111,7 +111,7 @@ tid_t task_creat(void (*task)(),task_attr_t attr)
 
 	prio_add(&sched,Task_Tcb_Index,attr.prio);
 	
-	task_awake(Task_Tcb_Index);
+	//task_awake(Task_Tcb_Index);
 	
 	
 	tid_t index=Task_Tcb_Index;

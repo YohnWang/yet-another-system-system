@@ -35,7 +35,7 @@ void time_handler(xlen_t sp[])
 	//
 	extern struct prio sched;
 	extern struct heap slp_q;
-	//printf("time int\n");
+	//printf("time int sp=%lx\n",sp);
 	if(!heap_empty(&slp_q))
 	{
 		tid_t id=slp_q.a[0];

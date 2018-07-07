@@ -10,7 +10,7 @@ INCLUDES = \
 
 
 CFLAGS =  \
-	$(WARNINGS) $(INCLUDES) -O2\
+	$(WARNINGS) $(INCLUDES)\
 	 -fno-strict-aliasing -fno-builtin \
 	-D__gracefulExit -mcmodel=medany -D_auto=__auto_type #-fPIC
 #/*-fomit-frame-pointer*/
