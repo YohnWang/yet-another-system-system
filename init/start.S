@@ -9,7 +9,8 @@ _mstart:
 	li t6, 0x1800
     csrw mstatus, t6
 	//set trap-vector base-address register
-    la t0, trap_vector
+    //la t0, trap_vector
+    la t0,trap_entry
     csrw mtvec, t0
 
     //initialize all general register

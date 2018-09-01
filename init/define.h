@@ -23,8 +23,8 @@
 
 
 .macro STORE_CTX_REG
-	addi sp,sp,-32*REGBYTES
-	STORE     ra,   0 * REGBYTES(sp)
+    addi sp,sp,-32*REGBYTES
+    STORE     ra,   0 * REGBYTES(sp)
     STORE     t0,   4 * REGBYTES(sp)
     STORE     t1,   5 * REGBYTES(sp)
     STORE     t2,   6 * REGBYTES(sp)

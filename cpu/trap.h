@@ -11,7 +11,7 @@
 
 
 
-struct regfiles
+struct trapframe
 {
     intptr_t ra;    // Return address
     intptr_t sp;    // Stack pointer
@@ -50,9 +50,9 @@ struct regfiles
 
 
 
-extern void halt(xlen_t,xlen_t);
-extern void syscall_handler(struct regfiles *sp);
-extern xlen_t trap_handler(xlen_t mcause,xlen_t mepc,struct regfiles *sp);
+extern void halt();
+extern void* syscall_handler(struct trapframe *sp);
+extern xlen_t trap_handler(xlen_t mcause,xlen_t mepc,struct trapframe *sp);
 
 enum syscall_num_t {SYS_EXIT=0,SYS_HALT,SYS_TASKSW,};
 

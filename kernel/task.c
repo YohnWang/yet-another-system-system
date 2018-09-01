@@ -185,7 +185,7 @@ tid_t get_next_tid()
 	return Task_Next_Id;
 }
 
-tid_t set_tid(tid_t id)
+void set_tid(tid_t id)
 {
 	Task_Id=id;
 }
@@ -227,14 +227,19 @@ void task_sche(void)
 	system_call(SYS_TASKSW);
 }
 
-
+void* __task_switch(struct trapframe *sp)
+{
+	Task_Tcb[get_tid()].sp=sp;
+	set_tid(get_next_tid());
+	return Task_Tcb[get_next_tid()].sp;
+}
 
 void task_sleep(uint64_t t)
 {
 	xlen_t sr;
 	atomic_begin(sr);
 	
-	Task_Tcb[Task_Id].finish_time=get_time()+t;
+	Task_Tcb[Task_Id].finish_time=get_time()+t/2;
 	heap_push(&slp_q,Task_Id);
 	prio_del(&sched,Task_Tcb[Task_Id].prio);
 	

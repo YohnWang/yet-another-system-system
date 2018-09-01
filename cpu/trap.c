@@ -6,9 +6,10 @@
 #include<task.h>
 #include<ds.h>
 
-extern void task_switch(struct regfiles *sp);
+extern void task_switch(struct trapframe *sp);
+extern void* __task_switch(struct trapframe *sp);
 
-void syscall_handler(struct regfiles *sp)
+void* syscall_handler(struct trapframe *sp)
 {
 	switch(sp->a0)
 	{
@@ -19,15 +20,16 @@ void syscall_handler(struct regfiles *sp)
 			
 			break;
 		case SYS_TASKSW:
-			task_switch(sp);
+			return __task_switch(sp);
 			break;
 		default:
 			printf("system call error,no such sysnum\n");
 			exit(1);
 	}
+	return sp;
 }
 
-void time_handler(struct regfiles *sp)
+void time_handler(struct trapframe *sp)
 {
 	//
 	extern struct prio sched;
@@ -54,7 +56,7 @@ void time_handler(struct regfiles *sp)
 }
 
 
-xlen_t trap_handler(xlen_t mcause,xlen_t mepc,struct regfiles *sp)
+xlen_t trap_handler(xlen_t mcause,xlen_t mepc,struct trapframe *sp)
 {
 
 	if(mcause<0)
@@ -72,7 +74,7 @@ xlen_t trap_handler(xlen_t mcause,xlen_t mepc,struct regfiles *sp)
 				time_handler(sp);
 				break;
 			default:
-				halt(mcause,mepc);
+				halt();
 				break;
 		}
 	}
@@ -86,18 +88,56 @@ xlen_t trap_handler(xlen_t mcause,xlen_t mepc,struct regfiles *sp)
 				mepc+=4;
 				break;
 			default:
-				halt(mcause,mepc);
+				halt();
 				break;
 		}
 	}
 	return mepc;
 }
 
-void halt(xlen_t mcause,xlen_t mepc)
+void* trap(intptr_t mcause,intptr_t mepc,struct trapframe *sp)
+{
+	if(mcause<0)
+	{
+		sp->epc=mepc;//restore mepc
+		//clear sign bit
+		mcause<<=1;
+		mcause>>=1;
+		switch(mcause)
+		{
+			extern void next_timecmp(void);
+			case 7://timer interrupt
+				
+				next_timecmp();
+				time_handler(sp);
+				break;
+			default:
+				halt(mcause,mepc);
+				break;
+		}
+	}
+	else 
+	{
+		switch(mcause)
+		{
+			case 11://scall M-mode
+				sp->epc=mepc+4;
+				return syscall_handler(sp);
+				break;
+			default:
+				halt(mcause,mepc);
+				break;
+		}
+	}
+	
+	return sp;
+}
+
+void halt()
 {
 	extern void exit(int);
 	disable_global_int();
-	printf("halt ,mcause=%lx ,mepc=%lx\n",mcause,mepc);
+	printf("halt ,mcause=%lx ,mepc=%lx ,mtval=%lx\n",read_csr(mcause),read_csr(mepc),read_csr(mbadaddr));
 	exit(0);
 }
 
