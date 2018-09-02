@@ -6,10 +6,9 @@
 #include<task.h>
 #include<ds.h>
 
-extern void task_switch(struct trapframe *sp);
-extern void* __task_switch(struct trapframe *sp);
+extern void* __task_switch(struct trapframe sp[]);
 
-void* syscall_handler(struct trapframe *sp)
+void* syscall_handler(struct trapframe sp[])
 {
 	switch(sp->a0)
 	{
@@ -29,7 +28,7 @@ void* syscall_handler(struct trapframe *sp)
 	return sp;
 }
 
-void time_handler(struct trapframe *sp)
+void* time_handler(struct trapframe sp[])
 {
 	//
 	extern struct prio sched;
@@ -51,51 +50,11 @@ void time_handler(struct trapframe *sp)
 	if(pr>=0)
 	{
 		task_next_task(prio_tid(&sched));
-		task_switch(sp);
+		return __task_switch(sp);
 	}
 }
 
-
-xlen_t trap_handler(xlen_t mcause,xlen_t mepc,struct trapframe *sp)
-{
-
-	if(mcause<0)
-	{
-		//clear xlen-1 bit
-		mcause<<=1;
-		mcause>>=1;
-		switch(mcause)
-		{
-			extern void next_timecmp(void);
-			case 7://timer interrupt
-				
-				next_timecmp();
-				sp->epc=mepc;
-				time_handler(sp);
-				break;
-			default:
-				halt();
-				break;
-		}
-	}
-	else 
-	{
-		switch(mcause)
-		{
-			case 11://scall M-mode
-				sp->epc=mepc+4;
-				syscall_handler(sp);
-				mepc+=4;
-				break;
-			default:
-				halt();
-				break;
-		}
-	}
-	return mepc;
-}
-
-void* trap(intptr_t mcause,intptr_t mepc,struct trapframe *sp)
+void* trap(intptr_t mcause,intptr_t mepc,struct trapframe sp[])
 {
 	if(mcause<0)
 	{
@@ -109,10 +68,10 @@ void* trap(intptr_t mcause,intptr_t mepc,struct trapframe *sp)
 			case 7://timer interrupt
 				
 				next_timecmp();
-				time_handler(sp);
+				return time_handler(sp);
 				break;
 			default:
-				halt(mcause,mepc);
+				halt();
 				break;
 		}
 	}
@@ -125,7 +84,7 @@ void* trap(intptr_t mcause,intptr_t mepc,struct trapframe *sp)
 				return syscall_handler(sp);
 				break;
 			default:
-				halt(mcause,mepc);
+				halt();
 				break;
 		}
 	}

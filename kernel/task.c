@@ -227,7 +227,7 @@ void task_sche(void)
 	system_call(SYS_TASKSW);
 }
 
-void* __task_switch(struct trapframe *sp)
+void* __task_switch(struct trapframe sp[])
 {
 	Task_Tcb[get_tid()].sp=sp;
 	set_tid(get_next_tid());

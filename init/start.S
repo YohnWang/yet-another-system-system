@@ -53,60 +53,6 @@ _mstart:
     .extern init
     j init
      
-    
-    .global trap_handler
-    .text
-    .align 4
-trap_vector:
-	
-    STORE_CTX_REG
-
-    //call xlen_t trap_handler(mcause,mepc,sp);
-    csrr a0,mcause
-    csrr a1,mepc
-    mv a2,sp
-    jal trap_handler
-    csrw mepc,a0
-    
-    LOAD_CTX_REG
-    
-    mret
-
-
-	.global task_switch
-task_switch:
-	//restore sp when trap occur ,it's important
-	mv sp,a0
-	
-	//then store sp
-	//first get the task id,and get this task's tcb:sp
-	//get_tcb_sp(get_tid())
-	jal get_tid
-	jal get_tcb_sp
-	//store sp
-	STORE sp,0(a0)
-
-	//switch to new task's tcb
-	//first get the new task id,and get its sp
-	jal get_next_tid
-	mv t0,a0
-	jal get_tcb_sp
-	//get new sp
-	LOAD sp,0(a0)
-
-	//set task id as new task id
-	mv a0,t0
-	jal set_tid
-	
-	//restore context
-	LOAD t0,31*REGBYTES(sp)
-	csrw mepc,t0
-	
-	LOAD_CTX_REG
-
-	mret
-
-
 	
 	.global cpu_sr_set
 	.align 4
