@@ -52,6 +52,7 @@ void* time_handler(struct trapframe sp[])
 		task_next_task(prio_tid(&sched));
 		return __task_switch(sp);
 	}
+	return sp;
 }
 
 void* trap(intptr_t mcause,intptr_t mepc,struct trapframe sp[])
