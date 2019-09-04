@@ -4,29 +4,16 @@
 
 static void init_bss(void)
 {
-
-	extern uint32_t __bss_start,__bss_end;
-
-	uint32_t *start=(void*)&__bss_start;
-	uint32_t *end  =(void*)(&__bss_end-1);
-	while(start<=end)
-	{
-		*start=0;
-		start++;
-	}
+	extern ureg_t __bss_start[],__bss_end[];
+	for(int i=0;&__bss_start[i]<=__bss_end;i++ )
+		__bss_start[i]=0;
 }
 
 static void init_sbss(void)
 {
-	extern uint32_t __sbss_start,__sbss_end;
-
-	uint32_t *start=(void*)&__sbss_start;
-	uint32_t *end  =(void*)(&__sbss_end-1);
-	while(start<=end)
-	{
-		*start=0;
-		start++;
-	}
+	extern ureg_t __sbss_start[],__sbss_end[];
+	for(int i=0;&__sbss_start[i]<=__sbss_end;i++ )
+		__sbss_start[i]=0;
 }
 
 #ifndef NULL

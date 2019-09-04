@@ -4,7 +4,7 @@
 #include<stdint.h>
 
 
-#define Time_Tick_Clk (1000)
+#define Time_Tick_Clk (500)
 
 typedef uint64_t time_t;
 

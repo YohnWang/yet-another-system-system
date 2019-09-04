@@ -65,6 +65,7 @@ xlen_t trap_handler(xlen_t mcause,xlen_t mepc,xlen_t sp[])
 		//clear xlen-1 bit
 		mcause<<=1;
 		mcause>>=1;
+		//mcause=mcause&(((ureg_t)~0)>>1);
 		switch(mcause)
 		{
 			extern void next_timecmp(void);

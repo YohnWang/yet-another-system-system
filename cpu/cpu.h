@@ -5,11 +5,13 @@
 
 #if __riscv_xlen == 64
 typedef int64_t xlen_t;
-
+typedef int64_t reg_t;
+typedef uint64_t ureg_t;
 
 #else 
 typedef int32_t xlen_t;
-
+typedef int32_t reg_t;
+typedef uint32_t ureg_t;
 
 #endif
  
@@ -24,8 +26,12 @@ typedef uint32_t ilen_t;
 extern void cpu_sr_reset(xlen_t);
 extern xlen_t   cpu_sr_set(void);
 
-#define atomic_begin(_sr)  ({_sr=cpu_sr_set();})
-#define atomic_end(_sr)   cpu_sr_reset(_sr)
+extern void set_mstatus(reg_t);
+extern reg_t get_mstatus();
+extern reg_t get_mstatus_and_disable_int(); 
+
+#define atomic_begin(_sr)  ({_sr=get_mstatus_and_disable_int();})
+#define atomic_end(_sr)   set_mstatus(_sr)
 
 #endif
 
