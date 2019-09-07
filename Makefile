@@ -1,58 +1,43 @@
-include ./Makefile.inc
 
+CC = riscv64-unknown-elf-gcc
 
-INCLUDES = \
-	-I. \
-	-I./init \
-	-I./schedule \
+INCLUDES = .\
 	-I./cpu \
+	-I./init \
 	-I./kernel
-
+	
+WARNINGS= -Wall
 
 CFLAGS =  \
 	$(WARNINGS) $(INCLUDES)\
-	 -fno-strict-aliasing -fno-builtin \
-	-D__gracefulExit -mcmodel=medany -D_auto=__auto_type #-fPIC
-#/*-fomit-frame-pointer*/
-GCCVER 	= $(shell $(GCC) --version | grep gcc | cut -d" " -f9)
-
-#
-# Define all object files.
-#
-OBJS = ./init/start.o ./init/init.o  main.o ./cpu/trap.o ./cpu/time.o ./cpu/host.o ./kernel/task.o ./kernel/sem.o ./kernel/alloc.o ./kernel/clock.o   ./kernel/rrsched.o ./kernel/fixed.o ./kernel/prio.o ./kernel/ds.o ./cpu/misc.o
-
+	-DDEBUG -g \
+	-fno-strict-aliasing -fno-builtin \
+	-mcmodel=medany 
+	
 LDFLAGS	 = -T link.ld -nostartfiles -static -nostdlib
-LIBS	 = -L$(CCPATH)/lib/gcc/$(TARGET)/$(GCCVER) \
-		   -L$(CCPATH)/$(TARGET)/lib \
-		   -lc -lgcc
 
-%.o: %.c
-	@echo "    CC $<"
-	@$(GCC) -c $(CFLAGS) -o $@ $<
+SRC =  $(wildcard ./*.c ./cpu/*.c ./init/*.c ./kernel/*.c)
+SRS =  $(wildcard ./cpu/*.S ./init/*.S)
+INC =  $(wildcard ./*.h ./cpu/*.h ./init/*.h ./kernel/*.h)
 
-%.o: %.S
-	@echo "    CC $<"
-	@$(GCC) -c $(CFLAGS) -o $@ $<
+OBJ1 = $(SRC:%.c=%.o)
+OBJ2 = $(SRS:%.S=%.o)
+OBJ = $(OBJ1) $(OBJ2)
 
-all: $(PROG).elf
+%.o: %.c $(INC)
+	$(CC) -c $(CFLAGS) -o $@ $<
+	
+%.o: %.S 
+	$(CC) -c $(CFLAGS) -o $@ $<
 
-$(PROG).elf  : $(OBJS) Makefile 
-	@echo Linking....
-	@$(GCC) -o $@ $(LDFLAGS) $(OBJS) $(LIBS)
-	@$(OBJDUMP) -S $(PROG).elf > $(PROG).asm	
-	@echo Completed $@
+all: yyos.exe
 
-clean :
-	-find . -name "*.o" | xargs rm 
-	-find . -name "*.elf" | xargs rm 
-	-find . -name "*.out" | xargs rm 
-	-rm $(PROG).asm
+yyos.exe: $(OBJ) $(INC)
+	$(CC) $(LDFLAGS) $(OBJ) -o yyos.exe 
 
-force_true:
-	@true
+clean:
+	-find . -name "*.o" |xargs rm 
+	-find . -name "*.exe" |xargs rm
 
-#-------------------------------------------------------------
-sim: all
-	spike $(PROG).elf
-
-
+run: all 
+	spike yyos.exe
