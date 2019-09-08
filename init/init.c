@@ -8,14 +8,14 @@ static void init_bss(void)
 	for(int i=0;&__bss_start[i]<=__bss_end;i++ )
 		__bss_start[i]=0;
 }
-
+/*
 static void init_sbss(void)
 {
 	extern ureg_t __sbss_start[],__sbss_end[];
 	for(int i=0;&__sbss_start[i]<=__sbss_end;i++ )
 		__sbss_start[i]=0;
 }
-
+*/
 #ifndef NULL
 #define NULL ((void*)0)
 #endif
@@ -34,7 +34,7 @@ void init(void)
 {
 	extern int main(int,char*[]);
 	extern struct prio sched;
-	init_sbss();
+	//init_sbss();
 	init_bss();
 	extern void init_heap(void);
 	init_heap();

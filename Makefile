@@ -14,7 +14,7 @@ CFLAGS =  \
 	-fno-strict-aliasing -fno-builtin \
 	-mcmodel=medany 
 	
-LDFLAGS	 = -T link.ld -nostartfiles -nostdlib 
+LDFLAGS	 = -T newlink.ld -nostartfiles -nostdlib 
 
 SRC =  $(wildcard ./*.c ./cpu/*.c ./init/*.c ./kernel/*.c)
 SRS =  $(wildcard ./cpu/*.S ./init/*.S)
