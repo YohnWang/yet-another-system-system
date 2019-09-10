@@ -4,18 +4,11 @@
 
 static void init_bss(void)
 {
-	extern ureg_t __bss_start[],__bss_end[];
-	for(int i=0;&__bss_start[i]<=__bss_end;i++ )
+	extern char __bss_start[],__bss_end[];
+	for(size_t i=0;&__bss_start[i]<__bss_end;i++ )
 		__bss_start[i]=0;
 }
-/*
-static void init_sbss(void)
-{
-	extern ureg_t __sbss_start[],__sbss_end[];
-	for(int i=0;&__sbss_start[i]<=__sbss_end;i++ )
-		__sbss_start[i]=0;
-}
-*/
+
 #ifndef NULL
 #define NULL ((void*)0)
 #endif

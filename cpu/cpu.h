@@ -20,7 +20,9 @@ typedef unsigned long ureg_t;
 
 typedef ureg_t atomic_t;
 #define atomic_begin(_sr)  ({_sr=read_mstatus_and_disable_int();})
-#define atomic_end(_sr)   set_mstatus(_sr)
+#define atomic_end(_sr)   write_csr(mstatus,_sr)
+
+#define scall(snum,args) ({})
 
 #endif
 

@@ -10,34 +10,27 @@ SECTIONS
 				*(.text) 
 			}
 			
+	.rodata :
+			{
+				*(.rodata)
+			}
+							
 	.data : 
 			{
-				*(.rodata)  
 				*(.data) 
+				*(.sdata)
 			}
+
+	__bss_start = . ;
+	.sbss :
+		{
+			*(.sbss) 
+		}
 			
 	.bss  : 
 			{ 
-				__bss_start = . ;
-				*(.sbss) 
 				*(.bss) 
 				*(COMMON) 
-				__bss_end = .; 
 			}
-			
-	.heap : 
-			{
-				. = ALIGN(4);
-				_heap = .;
-				_heap_start = .;
-				. += 0x4000;
-				_heap_end = .;
-    		}
-    		
-	.stack : 
-			{ 
-				. += 0x4000; 
-				. = ALIGN(4); 
-				_stack = .;
-			}
+	__bss_end = .; 
 }

@@ -97,6 +97,11 @@ xlen_t trap_handler(xlen_t mcause,xlen_t mepc,xlen_t sp[])
 	return mepc;
 }
 
+reg_t trap(reg_t mcause,reg_t mepc,reg_t sp[])
+{
+	
+}
+
 void halt(xlen_t mcause,xlen_t mepc)
 {
 	extern void exit(int);

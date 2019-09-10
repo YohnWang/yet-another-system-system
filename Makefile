@@ -38,6 +38,7 @@ yyos.exe: $(OBJ) $(INC)
 clean:
 	-find . -name "*.o" |xargs rm 
 	-find . -name "*.exe" |xargs rm
+	-find . -name "*~" |xargs rm 
 
 run: all 
 	spike yyos.exe

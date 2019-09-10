@@ -107,5 +107,7 @@ int main()
 	//t5=task_creat(timer,(task_attr_t){&Task5_STK[STK_LEN-1],5,.task_name="timer"});
 	enable_global_int();
 	enable_time_int();
+	task_sleep(500000);
+	exit(0);
 	for(;;){}
 }

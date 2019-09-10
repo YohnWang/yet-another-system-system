@@ -3,6 +3,9 @@
 extern char _heap_start[];
 extern char _heap_end[];
 
+char _heap_start[1];
+char _heap_end[1];
+
 static char *mem_heap;
 static char *mem_brk;
 static char *mem_max_addr; //saved.
