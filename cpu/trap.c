@@ -97,9 +97,40 @@ xlen_t trap_handler(xlen_t mcause,xlen_t mepc,xlen_t sp[])
 	return mepc;
 }
 
-reg_t trap(reg_t mcause,reg_t mepc,reg_t sp[])
+static void interrupt(reg_t mcause,frame_t *regs)
 {
 	
+}
+
+static void exception(reg_t mcause,frame_t *regs)
+{
+	switch(mcause)
+	{
+		case  CAUSE_MISALIGNED_FETCH :
+		case  CAUSE_FETCH_ACCESS :
+		case  CAUSE_ILLEGAL_INSTRUCTION :
+		case  CAUSE_BREAKPOINT :
+		case  CAUSE_MISALIGNED_LOAD :
+		case  CAUSE_LOAD_ACCESS :
+		case  CAUSE_MISALIGNED_STORE :
+		case  CAUSE_STORE_ACCESS :exit(mcause<<4);
+		case  CAUSE_USER_ECALL :
+		case  CAUSE_SUPERVISOR_ECALL :
+		case  CAUSE_HYPERVISOR_ECALL :
+		case  CAUSE_MACHINE_ECALL : write_csr(mepc,read_csr(mepc)+4);break;
+		case  CAUSE_FETCH_PAGE_FAULT :
+		case  CAUSE_LOAD_PAGE_FAULT :
+		case  CAUSE_STORE_PAGE_FAULT :
+		default : exit(mcause<<4);;
+	}
+}
+
+reg_t mtrap(reg_t mcause,frame_t *regs)
+{
+	if(mcause < 0)
+		interrupt(mcause,regs);
+	else 
+		exception(mcause,regs);
 }
 
 void halt(xlen_t mcause,xlen_t mepc)

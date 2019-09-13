@@ -12,7 +12,8 @@ enum Task_Status_t{NEW,RDY,RUN,BLK,EXT};
 typedef intptr_t tid_t;
 typedef struct tcb_t
 {
-	xlen_t *sp;
+	reg_t *sp;
+	reg_t pc;
 	tid_t  mgr;
 	int   prio;
 	int    status;

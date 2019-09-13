@@ -11,7 +11,7 @@
 
 struct frame_t
 {
-	reg_t epc;   // 
+	reg_t zero;   // 
     reg_t ra;    // Return address
     reg_t sp;    // Stack pointer
     reg_t gp;    // Global pointer
