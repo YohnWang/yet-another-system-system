@@ -96,7 +96,7 @@ void customer()
 }
 
 
-
+#include<encoding.h>
 int main()
 {
 	
@@ -108,6 +108,7 @@ int main()
 	enable_global_int();
 	enable_time_int();
 	task_sleep(500000);
+	printf("\n%ld\n",rdtime());
 	exit(0);
 	for(;;){}
 }

@@ -2,9 +2,9 @@
 
 
 
-#define PARENT(i)  ((i-1)/2)
-#define LEFT(i)    (i*2+1)
-#define RIGHT(i)   (i*2+2)
+#define PARENT(i)  ((i-1)>>1) //((i-1)/2)
+#define LEFT(i)    ((i<<1)+1) //(i*2+1)
+#define RIGHT(i)   ((i<<1)+2) //(i*2+2)
 
 static inline int Etype_less(Etype a,Etype b)
 {

@@ -99,7 +99,21 @@ xlen_t trap_handler(xlen_t mcause,xlen_t mepc,xlen_t sp[])
 
 static void interrupt(reg_t mcause,frame_t *regs)
 {
-	
+	switch(mcause&0xff)
+	{
+		case IRQ_S_SOFT   :
+		case IRQ_H_SOFT   :
+		case IRQ_M_SOFT   :
+		case IRQ_S_TIMER  :
+		case IRQ_H_TIMER  :
+		case IRQ_M_TIMER  :
+		case IRQ_S_EXT    :
+		case IRQ_H_EXT    :
+		case IRQ_M_EXT    :
+		case IRQ_COP      :
+		case IRQ_HOST     :
+		default           : exit(mcause<<4);
+	}
 }
 
 static void exception(reg_t mcause,frame_t *regs)
@@ -121,7 +135,7 @@ static void exception(reg_t mcause,frame_t *regs)
 		case  CAUSE_FETCH_PAGE_FAULT :
 		case  CAUSE_LOAD_PAGE_FAULT :
 		case  CAUSE_STORE_PAGE_FAULT :
-		default : exit(mcause<<4);;
+		default : exit(mcause<<4);
 	}
 }
 

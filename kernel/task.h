@@ -3,6 +3,7 @@
 
 #include<stdint.h>
 #include<cpu.h>
+#include<time.h>
 
 
 #define TASK_NUM (64)
@@ -18,6 +19,7 @@ typedef struct tcb_t
 	int   prio;
 	int    status;
 	uint64_t finish_time;
+	time_t excutable_time;
 	char *task_name;
 	
 }tcb_t;

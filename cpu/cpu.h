@@ -22,7 +22,13 @@ typedef ureg_t atomic_t;
 #define atomic_begin(_sr)  ({_sr=read_mstatus_and_disable_int();})
 #define atomic_end(_sr)   write_csr(mstatus,_sr)
 
-#define scall(snum,args) ({})
+#define scall(snum,arg0,arg1) ({ asm volatile( "mv a0,%[snum] \n\t \
+												mv a1,%[a0] \n\t \
+												mv a2,%[a1] \n\t \
+												scall"\
+												:[]"=r"()\
+												:[snum]"r"(snum),[a0]"r"(arg0),[a1]"r"(arg1) \
+												:"a0","a1","a2");})
 
 #endif
 

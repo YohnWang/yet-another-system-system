@@ -9,7 +9,7 @@
 #endif
 
 
-struct frame_t
+struct gprs_t
 {
 	reg_t zero;   // 
     reg_t ra;    // Return address
@@ -44,7 +44,16 @@ struct frame_t
     reg_t t5;    // Temporary
     reg_t t6;    // Temporary
 };
-typedef struct frame_t frame_t;
+typedef struct gprs_t gprs_t;
+
+struct trapframe_t
+{
+	gprs_t gpr;
+	reg_t  epc;
+	reg_t  status;
+};
+typedef struct trapframe_t trapframe_t;
+typedef void frame_t; //to compile
 
 extern void halt(xlen_t,xlen_t);
 extern void syscall_handler(xlen_t sp[]);
