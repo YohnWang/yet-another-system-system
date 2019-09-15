@@ -16,6 +16,7 @@ typedef struct tcb_t
 	reg_t *sp;
 	reg_t pc;
 	tid_t  mgr;
+	tid_t id;
 	int   prio;
 	int    status;
 	uint64_t finish_time;
@@ -34,6 +35,11 @@ typedef struct task_attr_t
 	tid_t mgr;
 	
 }task_attr_t;
+
+typedef struct task_t
+{
+	
+}task_t;
 
 
 

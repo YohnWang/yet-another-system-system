@@ -5,8 +5,8 @@
 #include<encoding.h>
 
 typedef int64_t xlen_t;
-typedef long reg_t;
-typedef unsigned long ureg_t;
+typedef intptr_t reg_t;
+typedef uintptr_t ureg_t;
 
 #define enable_global_int() asm("csrsi mstatus,0x8")
 #define disable_global_int() asm("csrci mstatus,0x8")

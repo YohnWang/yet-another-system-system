@@ -2,7 +2,7 @@
 #include<trap.h>
 #include<ds.h>
 #include<prio.h>
-
+#include<bits.h>
 
 //scheduler 
 struct prio sched={0,{0}};
@@ -18,9 +18,59 @@ static char  Task_Tcb_Used[TASK_NUM]={1};
 static tid_t Task_Tcb_Index=1;
 static tid_t Task_Counter=1;
 
+
+static struct task_alloc_t
+{
+	tcb_t task_list[64];
+	uint64_t task_bits;
+	uint64_t task_size;
+} task_pool ={{[0]={.prio=63,.task_name="main"}},1,1} ;
+
+static tid_t tid_alloc(struct task_alloc_t *pool)
+{
+	uint64_t b=~pool->task_bits;
+	int pos=ntz(b);
+	pool->task_bits=bit_set(pool->task_bits,pos);
+	pool->task_size+=1;
+	return pos;
+}
+
+static void tid_free(struct task_alloc_t *pool,int pos)
+{
+	pool->task_bits=bit_clr(pool->task_bits,pos);
+	pool->task_size-=1;
+}
+
+
 //point to task 
 static tid_t Task_Id=0;
 static tid_t Task_Next_Id=0;
+
+tid_t task_add(void (*task)(),task_attr_t attr)
+{
+	tid_t id=tid_alloc(&task_pool);
+	task_pool.task_list[id]=(tcb_t){
+										.sp=attr.sp-32,
+										.prio=attr.prio,
+										.id=id,
+										.excutable_time=0,
+										.task_name=attr.task_name,
+										
+										
+									};
+	//for(int i=0;i<32;i++)
+	//	(attr.sp-32)[i]=0;
+	gprs_t *gprs=(void*)(attr.sp-32);
+	extern void task_del();
+	gprs->ra=(reg_t)task_del;
+	
+	return id;
+}
+
+void task_del(tid_t id)
+{
+	tid_free(&task_pool,id);
+}
 
 //initialize context of task
 
