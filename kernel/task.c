@@ -61,6 +61,7 @@ tid_t task_add(void (*task)(),task_attr_t attr)
 	//for(int i=0;i<32;i++)
 	//	(attr.sp-32)[i]=0;
 	gprs_t *gprs=(void*)(attr.sp-32);
+	gprs->sp=(reg_t)gprs;
 	extern void task_del();
 	gprs->ra=(reg_t)task_del;
 	
@@ -70,6 +71,12 @@ tid_t task_add(void (*task)(),task_attr_t attr)
 void task_del(tid_t id)
 {
 	tid_free(&task_pool,id);
+}
+
+reg_t __attribute__((weak)) task_switch(tid_t id)
+{
+	reg_t epc=read_csr(mepc);
+	
 }
 
 //initialize context of task
