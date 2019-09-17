@@ -30,6 +30,12 @@ void syscall_handler(xlen_t sp[])
 #undef sysarg
 }
 
+void ecall_handler(gprs_t *gpr)
+{
+	extern long do_syscall();
+	do_syscall(gpr->a0,gpr->a1,gpr->a2,gpr->a3,gpr->a4,gpr->a5);
+}
+
 void time_handler(xlen_t sp[])
 {
 	//

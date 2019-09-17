@@ -18,3 +18,10 @@ long do_syscall(long a0,long a1,long a2,long a3,long a4,long a5,long n)
 	syscall_t f=syscall_table[n];
 	return f(a0,a1,a2,a3,a4,a5,n);
 }
+
+long syscall(long sysnum,...)
+{
+	long r;
+	asm volatile ("ecall\n\t mv %[r],a0":[r]"=r"(r));
+	return r;
+}

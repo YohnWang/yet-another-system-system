@@ -68,6 +68,12 @@ tid_t task_add(void (*task)(),task_attr_t attr)
 	return id;
 }
 
+static void task_store_context(tid_t id,reg_t sp,reg_t epc)
+{
+	task_pool.task_list[id].sp=sp;
+	task_pool.task_list[id].pc=epc;
+}
+
 void task_del(tid_t id)
 {
 	tid_free(&task_pool,id);
@@ -75,8 +81,10 @@ void task_del(tid_t id)
 
 reg_t __attribute__((weak)) task_switch(tid_t id)
 {
-	reg_t epc=read_csr(mepc);
-	
+	task_store_context(id,0,read_csr(mepc));
+	Task_Id=id;
+	write_csr(mepc,task_pool.task_list[id].pc);
+	return (reg_t)task_pool.task_list[id].sp;
 }
 
 //initialize context of task
