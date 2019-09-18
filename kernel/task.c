@@ -3,6 +3,7 @@
 #include<ds.h>
 #include<prio.h>
 #include<bits.h>
+#include<syscall.h>
 
 //scheduler 
 struct prio sched={0,{0}};
@@ -183,9 +184,16 @@ tid_t task_creat(void (*task)(),task_attr_t attr)
 	printf("task id =%lld \n",index);
 	atomic_end(sr);
 	return index;
+	return syscall(SYS_task_create,0,0,0,0,0);
 }
 
-
+tid_t task_create(int (*task)(),task_attr_t attr)
+{
+	syscall(SYS_int_disable,0,0,0,0,0);
+	tid_t id=task_add(task,attr);
+	syscall(SYS_int_enable,0,0,0,0,0);
+	return id;
+}
 
 void task_block()
 {
