@@ -103,7 +103,7 @@ xlen_t trap_handler(xlen_t mcause,xlen_t mepc,xlen_t sp[])
 	return mepc;
 }
 
-static void interrupt(reg_t mcause,frame_t *regs)
+static void interrupt(reg_t mcause,reg_t sp[])
 {
 	switch(mcause&0xff)
 	{
@@ -122,7 +122,7 @@ static void interrupt(reg_t mcause,frame_t *regs)
 	}
 }
 
-static void exception(reg_t mcause,frame_t *regs)
+static void exception(reg_t mcause,reg_t sp[])
 {
 	switch(mcause)
 	{
@@ -137,7 +137,7 @@ static void exception(reg_t mcause,frame_t *regs)
 		case  CAUSE_USER_ECALL :
 		case  CAUSE_SUPERVISOR_ECALL :
 		case  CAUSE_HYPERVISOR_ECALL :
-		case  CAUSE_MACHINE_ECALL : write_csr(mepc,read_csr(mepc)+4);break;
+		case  CAUSE_MACHINE_ECALL : write_csr(mepc,read_csr(mepc)+4); ecall_handler((gprs_t*)sp); break;
 		case  CAUSE_FETCH_PAGE_FAULT :
 		case  CAUSE_LOAD_PAGE_FAULT :
 		case  CAUSE_STORE_PAGE_FAULT :
@@ -145,12 +145,12 @@ static void exception(reg_t mcause,frame_t *regs)
 	}
 }
 
-reg_t mtrap(reg_t mcause,frame_t *regs)
+void mtrap(reg_t mcause,reg_t sp[])
 {
 	if(mcause < 0)
-		interrupt(mcause,regs);
+		interrupt(mcause,sp);
 	else 
-		exception(mcause,regs);
+		exception(mcause,sp);
 }
 
 void halt(xlen_t mcause,xlen_t mepc)

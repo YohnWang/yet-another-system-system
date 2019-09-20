@@ -12,6 +12,6 @@
 #define SYS_time        7
 #define SYS_
 
-extern long syscall(long sysnum,long arg0,long arg1,long arg2,long arg3,long arg4);
+extern long syscall();
 
 #endif

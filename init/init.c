@@ -18,7 +18,7 @@ void __attribute__((weak)) exit(int rvalue)
 	extern int printf(const char*,...);
 	disable_global_int();
 	//printf("this exit function is default\n");
-	//printf("exit!!!code: %d\n",rvalue);
+	printf("system shutdown: exit code: %d\n",rvalue);
 	tohost=1|(rvalue<<1);
 	for(;;){}
 }

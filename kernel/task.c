@@ -47,21 +47,21 @@ static void tid_free(struct task_alloc_t *pool,int pos)
 static tid_t Task_Id=0;
 static tid_t Task_Next_Id=0;
 
-tid_t task_add(void (*task)(),task_attr_t attr)
+tid_t task_add(void (*task)(),task_attr_t *attr)
 {
 	tid_t id=tid_alloc(&task_pool);
 	task_pool.task_list[id]=(tcb_t){
-										.sp=attr.sp-32,
-										.prio=attr.prio,
+										.sp=attr->sp-32,
+										.prio=attr->prio,
 										.id=id,
 										.excutable_time=0,
-										.task_name=attr.task_name,
+										.task_name=attr->task_name,
 										
 										
 									};
 	//for(int i=0;i<32;i++)
 	//	(attr.sp-32)[i]=0;
-	gprs_t *gprs=(void*)(attr.sp-32);
+	gprs_t *gprs=(void*)(attr->sp-32);
 	gprs->sp=(reg_t)gprs;
 	extern void task_del();
 	gprs->ra=(reg_t)task_del;
@@ -74,18 +74,23 @@ static void task_store_context(tid_t id,reg_t sp,reg_t epc)
 	task_pool.task_list[id].sp=sp;
 	task_pool.task_list[id].pc=epc;
 }
+static void task_restore_context(tid_t id)
+{
+	write_csr(mepc,task_pool.task_list[id].pc);
+	write_csr(mscratch,task_pool.task_list[id].sp);
+}
 
 void task_del(tid_t id)
 {
 	tid_free(&task_pool,id);
 }
 
-reg_t __attribute__((weak)) task_switch(tid_t id)
+reg_t __attribute__((weak)) task_switch(tid_t old,tid_t new)
 {
-	task_store_context(id,0,read_csr(mepc));
-	Task_Id=id;
-	write_csr(mepc,task_pool.task_list[id].pc);
-	return (reg_t)task_pool.task_list[id].sp;
+	task_store_context(old,read_csr(mscratch),read_csr(mepc));
+	Task_Id=new;
+	task_restore_context(new);
+	return 0;
 }
 
 //initialize context of task
@@ -189,10 +194,8 @@ tid_t task_creat(void (*task)(),task_attr_t attr)
 
 tid_t task_create(int (*task)(),task_attr_t attr)
 {
-	syscall(SYS_int_disable,0,0,0,0,0);
-	tid_t id=task_add(task,attr);
-	syscall(SYS_int_enable,0,0,0,0,0);
-	return id;
+	return syscall(SYS_task_create,task,&attr);
+	
 }
 
 void task_block()

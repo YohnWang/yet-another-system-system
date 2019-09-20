@@ -26,6 +26,7 @@ get_mstatus_and_disable_int:
 trap_vector:
 	
     STORE_CTX_REG
+    csrrw zero,mscratch,sp
 
     //call xlen_t trap_handler(mcause,mepc,sp);
     csrr a0,mcause
@@ -35,6 +36,7 @@ trap_vector:
     jal trap_handler
     csrw mepc,a0
     
+    csrr sp,mscratch
     LOAD_CTX_REG
     
     mret
