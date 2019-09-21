@@ -30,10 +30,13 @@ trap_vector:
 
     //call xlen_t trap_handler(mcause,mepc,sp);
     csrr a0,mcause
-    csrr a1,mepc
-    mv a2,sp
+    //csrr a1,mepc
+    //mv a2,sp
+    mv a1,sp
     .extern trap_handler
-    jal trap_handler
+    //jal trap_handler
+    .extern mtrap
+    jal mtrap
     csrw mepc,a0
     
     csrr sp,mscratch

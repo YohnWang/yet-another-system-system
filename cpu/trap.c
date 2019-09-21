@@ -112,13 +112,13 @@ static void interrupt(reg_t mcause,reg_t sp[])
 		case IRQ_M_SOFT   :
 		case IRQ_S_TIMER  :
 		case IRQ_H_TIMER  :
-		case IRQ_M_TIMER  :
+		case IRQ_M_TIMER  : printf("time int\n");
 		case IRQ_S_EXT    :
 		case IRQ_H_EXT    :
 		case IRQ_M_EXT    :
 		case IRQ_COP      :
 		case IRQ_HOST     :
-		default           : exit(mcause<<4);
+		default           : halt();
 	}
 }
 
@@ -133,15 +133,15 @@ static void exception(reg_t mcause,reg_t sp[])
 		case  CAUSE_MISALIGNED_LOAD :
 		case  CAUSE_LOAD_ACCESS :
 		case  CAUSE_MISALIGNED_STORE :
-		case  CAUSE_STORE_ACCESS :exit(mcause<<4);
+		case  CAUSE_STORE_ACCESS :
 		case  CAUSE_USER_ECALL :
 		case  CAUSE_SUPERVISOR_ECALL :
-		case  CAUSE_HYPERVISOR_ECALL :
+		case  CAUSE_HYPERVISOR_ECALL :halt();
 		case  CAUSE_MACHINE_ECALL : write_csr(mepc,read_csr(mepc)+4); ecall_handler((gprs_t*)sp); break;
 		case  CAUSE_FETCH_PAGE_FAULT :
 		case  CAUSE_LOAD_PAGE_FAULT :
 		case  CAUSE_STORE_PAGE_FAULT :
-		default : exit(mcause<<4);
+		default : halt();
 	}
 }
 
@@ -153,11 +153,11 @@ void mtrap(reg_t mcause,reg_t sp[])
 		exception(mcause,sp);
 }
 
-void halt(xlen_t mcause,xlen_t mepc)
+void halt()
 {
 	extern void exit(int);
 	disable_global_int();
-	printf("halt ,mcause=%lx ,mepc=%lx\n",mcause,mepc);
+	printf("halt,mcause=%lx ,mepc=%lx , mtval=%lx\n",read_csr(mcause),read_csr(mepc),read_csr(mbadaddr));
 	exit(0);
 }
 

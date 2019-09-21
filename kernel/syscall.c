@@ -7,12 +7,12 @@ typedef long (*syscall_t)(long,long,long,long,long,long);
 
 long do_syscall(long a0,long a1,long a2,long a3,long a4,long n)
 {
-	extern long task_creat(),task_switch();
+	extern long task_add(),task_switch();
 	const static void *syscall_table[]=
 	{
 		[SYS_restart]=0,
 		[SYS_exit]=0,
-		[SYS_task_create]=task_creat,
+		[SYS_task_create]=task_add,
 		[SYS_task_switch]=task_switch,
 	};
 	syscall_t f=syscall_table[n];

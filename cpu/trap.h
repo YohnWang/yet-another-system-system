@@ -55,7 +55,7 @@ struct trapframe_t
 typedef struct trapframe_t trapframe_t;
 typedef void frame_t; //to compile
 
-extern void halt(xlen_t,xlen_t);
+extern void halt();
 extern void syscall_handler(xlen_t sp[]);
 extern xlen_t trap_handler(xlen_t mcause,xlen_t mepc,xlen_t sp[]);
 
